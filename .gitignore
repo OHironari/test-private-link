@@ -4,6 +4,7 @@ terraform.tfvars
 # Terraform files
 .terraform/
 .terraform.lock.hcl
+providers.tf
 
 # Terraform state
 *.tfstate
