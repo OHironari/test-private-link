@@ -20,20 +20,39 @@ resource "aws_s3_bucket_public_access_block" "s3_bucket" {
   restrict_public_buckets = true
 }
 
-# resource "aws_s3_bucket_policy" "s3_bucket" {
-#   bucket = aws_s3_bucket.s3_bucket.id
-#   policy = data.aws_iam_policy_document.s3_bucket.json
-#   depends_on = [ aws_s3_bucket.s3_bucket ]
-# }
+resource "aws_s3_bucket_policy" "s3_bucket" {
+  count = 2
+  bucket = aws_s3_bucket.s3_bucket.id
+  policy = data.aws_iam_policy_document.bucket_policy[count.index].json
+  depends_on = [ aws_s3_bucket.s3_bucket ]
+}
 
-# data "aws_iam_policy_document" "s3_bucket" {
-#   statement {
-#     effect    = "Allow"
-#     actions   = ["s3:GetObject"]
-#     resources = ["${aws_s3_bucket.s3_bucket.arn}/*"]
-#     principals {
-#       type        = "AWS"
-#       identifiers = [var.iam_arn]
-#     }
-#   }
-# }
+data "aws_iam_policy_document" "bucket_policy" {
+  count = 2
+  statement {
+    sid    = "AllowEC2RoleAccess"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = [aws_iam_role.ec2_role.arn]
+    }
+
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}/*",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:sourceVpce"
+      values   = [aws_vpc_endpoint.s3[count.index].id]
+    }
+  }
+}

@@ -3,14 +3,15 @@
 # ----------------------------------
 
 resource "aws_vpc" "vpc" {
-  cidr_block                       = "192.168.0.0/20"
+  count = 2
+  cidr_block                       = count.index == 0 ? "192.168.0.0/20" : "192.169.0.0/20"
   instance_tenancy                 = "default"
   enable_dns_hostnames             = true
   enable_dns_support               = true
   assign_generated_ipv6_cidr_block = false
 
   tags = {
-    Name    = "${var.project}-${var.environment}-vpc"
+    Name    = "${var.project}-${var.environment}-vpc${count.index}"
     Project = var.project
     Env     = var.environment
   }
@@ -20,13 +21,14 @@ resource "aws_vpc" "vpc" {
 # Subnet
 # ----------------------------------
 
-resource "aws_subnet" "private_subnet_1c" {
-  vpc_id                  = aws_vpc.vpc.id
-  availability_zone       = "ap-northeast-1c"
-  cidr_block              = "192.168.12.0/24"
+resource "aws_subnet" "private_subnet" {
+  count = 2
+  vpc_id                  = aws_vpc.vpc[count.index].id
+  availability_zone       = count.index==0 ? "ap-northeast-1a" : "ap-northeast-1c"
+  cidr_block              = count.index==0 ? "192.168.12.0/24" : "192.169.12.0/24"
   map_public_ip_on_launch = false
   tags = {
-    Name    = "${var.project}-${var.environment}-private(ap-northeast-1c)"
+    Name    = "${var.project}-${var.environment}-private${count.index}"
     Project = var.project
     Env     = var.environment
   }
@@ -36,24 +38,26 @@ resource "aws_subnet" "private_subnet_1c" {
 # Route Table
 # ----------------------------------
 resource "aws_route_table" "private_rt" {
-  vpc_id = aws_vpc.vpc.id
+  count = 2
+  vpc_id = aws_vpc.vpc[count.index].id
   tags = {
-    Name    = "${var.project}-${var.environment}-private_rt"
+    Name    = "${var.project}-${var.environment}-private_rt${count.index}"
     Project = var.project
     Env     = var.environment
   }
 }
 
-resource "aws_route_table_association" "private_rta_1c" {
-  route_table_id = aws_route_table.private_rt.id
-  subnet_id      = aws_subnet.private_subnet_1c.id
+resource "aws_route_table_association" "private_rta" {
+  count=2
+  route_table_id = aws_route_table.private_rt[count.index].id
+  subnet_id      = aws_subnet.private_subnet[count.index].id
 }
 
 # ----------------------------------
 # Internet Gateway
 # ----------------------------------
 # resource "aws_internet_gateway" "igw" {
-#   vpc_id = aws_vpc.vpc.id
+#   vpc_id = aws_vpc.vpc1.id
 #   tags = {
 #     Name    = "${var.project}-${var.environment}-igw"
 #     Project = var.project
