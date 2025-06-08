@@ -41,3 +41,34 @@ resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
   policy_arn = aws_iam_policy.s3_read_policy.arn
 }
 
+
+
+# For attach transfer family
+resource "aws_iam_role" "transfer_family_user_role" {
+  name               = "transfer_family_user_role"
+  assume_role_policy = data.aws_iam_policy_document.transfer_assume.json
+}
+
+resource "aws_iam_role_policy_attachment" "transfer_access_s3_policy" {
+  role       = aws_iam_role.transfer_family_user_role.name
+  policy_arn = aws_iam_policy.s3_read_policy.arn
+}
+
+data "aws_iam_policy_document" "transfer_assume" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "transfer.amazonaws.com",
+      ]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:SetContext",
+    ]
+  }
+}
+

@@ -69,3 +69,25 @@ resource "aws_security_group_rule" "ec2_endpoint_out_ssh" {
   to_port                  = 0
   cidr_blocks = ["0.0.0.0/0"]
 }
+
+# Transfer Family Security Group
+
+resource "aws_security_group" "transfer_family_sg" {
+  name        = "${var.project}-${var.environment}-transfer_family_sg"
+  description = "Transfer_family security group"
+  vpc_id      = aws_vpc.vpc[var.select_network].id
+  tags = {
+    Name    = "${var.project}-${var.environment}-transfer_family-sg"
+    Project = var.project
+    Env     = var.environment
+  }
+}
+
+resource "aws_security_group_rule" "transfer_family_in_ssh" {
+  security_group_id        = aws_security_group.transfer_family_sg.id
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 22
+  to_port                  = 22
+  cidr_blocks = ["0.0.0.0/0"]
+}

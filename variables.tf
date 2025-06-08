@@ -38,3 +38,10 @@ variable "iam_arn" {
   type= string
   description = "This defines role arn"
 }
+
+variable "select_network" {
+  type= number
+  description = "This variable can select network count 0 or 1"
+}
+
+
