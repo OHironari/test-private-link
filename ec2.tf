@@ -2,16 +2,16 @@
 # key pair
 # ----------------------------------
 
-resource "aws_key_pair" "keypair" {
-  key_name   = "${var.project}-${var.environment}-keypair"
-  public_key = file("./myportfolio-dev-keypair.pub")
+# resource "aws_key_pair" "keypair" {
+#   key_name   = "${var.project}-${var.environment}-keypair"
+#   public_key = file("./myportfolio-dev-keypair.pub")
 
-  tags = {
-    Name    = "${var.project}-${var.environment}-keypair"
-    Project = var.project
-    Env     = var.environment
-  }
-}
+#   tags = {
+#     Name    = "${var.project}-${var.environment}-keypair"
+#     Project = var.project
+#     Env     = var.environment
+#   }
+# }
 
 # ----------------------------------
 # ec2 instance
@@ -25,7 +25,7 @@ resource "aws_instance" "ec2_server" {
   vpc_security_group_ids = [
     aws_security_group.ec2_sg[count.index].id
   ]
-  key_name = aws_key_pair.keypair.key_name
+  #key_name = aws_key_pair.keypair.key_name
   
   tags = {
     Name    = "${var.project}-${var.environment}-ec2-${count.index}"

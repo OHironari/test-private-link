@@ -18,13 +18,12 @@ resource "aws_transfer_user" "transfer_user" {
   server_id = aws_transfer_server.access_s3.id
   user_name = "transfer_user"
   role      = aws_iam_role.transfer_family_user_role.arn
+  home_directory_type = "LOGICAL"
   home_directory = "/home/transfer_user"
-#   home_directory_mappings = [
-#     {
-#       entry  = "/home/transfer_user"
-#       target = "${aws_s3_bucket.s3_bucket.arn}/home/transfer_user"
-#     }
-#     ]
+  home_directory_mappings {
+      entry  = "/home/transfer_user"
+      target = "/${aws_s3_bucket.s3_bucket.bucket}/home/transfer_user"
+    }
 }
 
 resource "tls_private_key" "sshkey" {
@@ -41,4 +40,12 @@ resource "aws_transfer_ssh_key" "sshkey" {
 output "sftp_private_key_pem" {
   value     = tls_private_key.sshkey.private_key_pem
   sensitive = true
+}
+
+# private keyはEC2にkeyを作成して内容コピペする
+#そいつを使うと接続できる
+resource "local_file" "sftp_private_key" {
+  content  = tls_private_key.sshkey.private_key_pem
+  filename = "./my_sftp_key.pem"
+  file_permission = "0600"
 }

@@ -13,3 +13,6 @@ providers.tf
 # env file
 .env
 
+# key
+*.pem
+*.pub
