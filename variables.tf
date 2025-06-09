@@ -44,4 +44,10 @@ variable "select_network" {
   description = "This variable can select network count 0 or 1"
 }
 
+variable "not_select_network" {
+  type= number
+  description = "This variable can not select network count 0 or 1"
+}
+
+
 

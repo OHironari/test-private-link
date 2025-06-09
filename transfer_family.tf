@@ -49,3 +49,4 @@ resource "local_file" "sftp_private_key" {
   filename = "./my_sftp_key.pem"
   file_permission = "0600"
 }
+
